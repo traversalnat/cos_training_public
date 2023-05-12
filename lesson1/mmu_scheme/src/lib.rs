@@ -10,6 +10,7 @@ const PHYS_VIRT_OFFSET: usize = 0xffff_ffc0_0000_0000;
 #[link_section = ".data.boot_page_table"]
 static mut BOOT_PT: [u64; 512] = [0; 512];
 
+#[cfg(feature = "sv48")]
 #[link_section = ".data.boot_page_table"]
 static mut BOOT_PT_PMD: [u64; 512] = [0; 512];
 
@@ -34,9 +35,9 @@ pub unsafe fn pre_mmu() {
     // 0xffff_ffff_c000_0000..highest, VRWX_GAD, 1G block
     BOOT_PT_PMD[0x1ff] = (0x80000 << 10) | 0xef;
 
-    BOOT_PT[0] = ((BOOT_PT_PMD.as_ptr() as u64) << 10) | 0xef;
-
-    BOOT_PT[0x1ff] = ((BOOT_PT_PMD.as_ptr() as u64) << 10) | 0xef;
+    let pmd_pt = BOOT_PT_PMD.as_ptr() as u64 >> 12;
+    BOOT_PT[0] = (pmd_pt << 10) | 0x01;
+    BOOT_PT[0x1ff] = (pmd_pt << 10) | 0x01;
 }
 
 pub unsafe fn enable_mmu() {
