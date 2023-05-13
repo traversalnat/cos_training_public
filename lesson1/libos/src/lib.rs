@@ -11,6 +11,9 @@ extern crate mmu_alterable as mmu;
 #[cfg(any(feature = "sv39", feature = "sv48"))]
 extern crate mmu_scheme as mmu;
 
+#[cfg(any(feature = "sv39_a3", feature = "sv48_a3"))]
+extern crate mmu_scheme_a3 as mmu;
+
 pub use mmu::KERNEL_BASE;
 
 mod lang_items;
