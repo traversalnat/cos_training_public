@@ -117,7 +117,7 @@ pub unsafe fn pre_mmu() {
         GIGA_PGSIZE,
         0xef,
         &mut alloc_page,
-        &mut phys_to_virt,
+        &phys_to_virt,
     );
     boot_map(
         table,
@@ -127,7 +127,7 @@ pub unsafe fn pre_mmu() {
         GIGA_PGSIZE,
         0xef,
         &mut alloc_page,
-        &mut phys_to_virt,
+        &phys_to_virt,
     );
     boot_map(
         table,
@@ -137,7 +137,7 @@ pub unsafe fn pre_mmu() {
         GIGA_PGSIZE,
         0xef,
         &mut alloc_page,
-        &mut phys_to_virt,
+        &phys_to_virt,
     );
 }
 
