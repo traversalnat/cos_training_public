@@ -1,7 +1,6 @@
 #![no_std]
 #![feature(asm_const)]
 
-use core::assert_eq;
 use core::sync::atomic::AtomicUsize;
 use core::sync::atomic::Ordering;
 use riscv::register::satp;
@@ -18,7 +17,7 @@ pub const KERNEL_BASE: usize = 0xffff_ffff_c000_0000;
 const PHYS_VIRT_OFFSET: usize = 0xffff_ffc0_0000_0000;
 
 // 1GB page size
-const GIGA_PGSIZE: usize = 0x100000;
+const GIGA_PGSIZE: usize = 0x40000000;
 
 #[derive(Clone, Copy)]
 struct PageTable([usize; 512]);
@@ -48,6 +47,12 @@ fn pa2_pte(pa: usize) -> usize {
     (pa >> 12) << 10
 }
 
+// round a down to GIGA_PGSIZE
+#[inline]
+fn pg_round_down(a: usize) -> usize {
+    a & !(GIGA_PGSIZE - 1)
+}
+
 fn alloc_page() -> *mut PageTable {
     static PAGE_NO: AtomicUsize = AtomicUsize::new(0);
     let index = PAGE_NO.fetch_add(1, Ordering::Relaxed);
@@ -64,7 +69,7 @@ fn boot_map<F1, F2>(
     level: usize,
     va: usize,
     pa: usize,
-    _len: usize,
+    len: usize,
     prot: usize,
     alloc_page: &mut F1,
     _phys_to_virt: &F2,
@@ -72,21 +77,34 @@ fn boot_map<F1, F2>(
     F1: FnMut() -> *mut PageTable,
     F2: Fn(PAddr) -> *mut PageTable,
 {
-    let mut pagetable = table;
-    let mut idx = level - 1;
-    // 只映射到 1GB 这一级, level = 2
-    while idx > 2 {
-        let pte = &mut pagetable.0[px(idx, va)];
-        if *pte & 0x01 == 1 {
-            pagetable = unsafe { &mut *pte2_pa(*pte) };
-        } else {
-            pagetable = unsafe { &mut *alloc_page() };
-            *pte = pa2_pte(pagetable.0.as_ptr() as usize) | 0x01;
-        }
-        idx -= 1;
-    }
+    let mut a = pg_round_down(va);
+    let last = pg_round_down(va + len - 1);
+    let mut pa = pa;
 
-    pagetable.0[px(idx, va)] = pa2_pte(pa) | prot | 0x01;
+    loop {
+        let mut pagetable = &mut *table;
+        let mut idx = level - 1;
+        // 只映射到 1GB 这一级, level = 2
+        while idx > 2 {
+            let pte = &mut pagetable.0[px(idx, a)];
+            if *pte & 0x01 == 1 {
+                pagetable = unsafe { &mut *pte2_pa(*pte) };
+            } else {
+                pagetable = unsafe { &mut *alloc_page() };
+                *pte = pa2_pte(pagetable.0.as_ptr() as usize) | 0x01;
+            }
+            idx -= 1;
+        }
+
+        pagetable.0[px(idx, a)] = pa2_pte(pa) | prot | 0x01;
+
+        if a == last {
+            break;
+        }
+
+        a += GIGA_PGSIZE;
+        pa += GIGA_PGSIZE;
+    }
 }
 
 pub unsafe fn pre_mmu() {
