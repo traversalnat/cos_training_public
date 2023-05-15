@@ -8,6 +8,7 @@ edition = "2021"
 [features]
 sv39 = []
 sv48 = []
+sv57 = []
 
 [dependencies]
 riscv = "0.10"

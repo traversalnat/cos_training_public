@@ -5,8 +5,9 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [features]
-sv39_a3 = ["libos/sv39"]
-sv48_a3 = ["libos/sv48"]
+sv39_a3 = ["libos/sv39_a3"]
+sv48_a3 = ["libos/sv48_a3"]
+sv57_a3 = ["libos/sv57_a3"]
 
 [dependencies]
 libos = { path = "../../libos" }

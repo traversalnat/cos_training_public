@@ -13,6 +13,7 @@ sv39 = ["mmu-scheme/sv39"]
 sv48 = ["mmu-scheme/sv48"]
 sv39_a3 = ["mmu-scheme-a3/sv39"]
 sv48_a3 = ["mmu-scheme-a3/sv48"]
+sv57_a3 = ["mmu-scheme-a3/sv57"]
 
 [dependencies]
 riscv = "0.10"

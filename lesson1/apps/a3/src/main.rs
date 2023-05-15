@@ -9,10 +9,12 @@ fn main() {
 
     verify();
 
-    if cfg!(feature = "sv39") {
+    if cfg!(feature = "sv39_a3") {
         libos::println!("Result: sv39 Okay!");
-    } else {
+    } else if cfg!(feature = "sv48_a3") {
         libos::println!("Result: sv48 Okay!");
+    } else if cfg!(feature = "sv57_a3") {
+        libos::println!("Result: sv57 Okay!");
     }
 }
 

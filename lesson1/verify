@@ -21,6 +21,7 @@ for step in "$@"; do
         a3)
             make clean && make STEP=a3 STEP_FEATURES=sv39_a3 run | tee /tmp/a3_sv39
             make clean && make STEP=a3 STEP_FEATURES=sv48_a3 run | tee /tmp/a3_sv48
+            make clean && make STEP=a3 STEP_FEATURES=sv57_a3 run | tee /tmp/a3_sv57
             ;;
         *)
             echo 'no such step'
