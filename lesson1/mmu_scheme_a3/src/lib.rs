@@ -107,38 +107,25 @@ fn boot_map<F1, F2>(
     }
 }
 
+macro_rules! boot_map_pages {
+    ( $( ($table:expr, $va:expr, $pa:expr, $len:expr, $prot:expr) ),* ) => {
+        {
+            $(
+                boot_map($table, MMU_LEVELS, $va, $pa, $len, $prot, &mut alloc_page, &phys_to_virt);
+            )*
+        }
+
+    };
+
+}
+
 pub unsafe fn pre_mmu() {
     let table = &mut PAGETABLE;
-    boot_map(
-        table,
-        MMU_LEVELS,
-        0x8000_0000,
-        0x8000_0000,
-        GIGA_PGSIZE,
-        0xef,
-        &mut alloc_page,
-        &phys_to_virt,
-    );
-    boot_map(
-        table,
-        MMU_LEVELS,
-        0xffff_ffc0_8000_0000,
-        0x8000_0000,
-        GIGA_PGSIZE,
-        0xef,
-        &mut alloc_page,
-        &phys_to_virt,
-    );
-    boot_map(
-        table,
-        MMU_LEVELS,
-        0xffff_ffff_c000_0000,
-        0x8000_0000,
-        GIGA_PGSIZE,
-        0xef,
-        &mut alloc_page,
-        &phys_to_virt,
-    );
+    boot_map_pages![
+        (table, 0x8000_0000, 0x8000_0000, GIGA_PGSIZE, 0xef),
+        (table, 0xffff_ffc0_8000_0000, 0x8000_0000, GIGA_PGSIZE, 0xef),
+        (table, 0xffff_ffff_c000_0000, 0x8000_0000, GIGA_PGSIZE, 0xef)
+    ];
 }
 
 pub unsafe fn enable_mmu() {
