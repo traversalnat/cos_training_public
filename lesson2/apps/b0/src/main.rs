@@ -14,14 +14,25 @@ fn main() {
     verify();
 }
 
-/* Todo: Implement it */
-fn traverse_drivers() {
-    libos::println!("\n!!! Fix it !!!\n");
-    // Parse range of init_calls by calling C function.
-    // display_initcalls_range(range_start, range_end);
+// 在libos/linker_riscv64.lds中定义，用于指示 .init_calls 段的开始和结束地址
+extern "C" {
+    fn __init_calls_start();
+    fn __init_calls_end();
+}
 
-    // For each driver, display name & compatible
-    // display_drv_info(drv.name, drv.compatible);
+fn traverse_drivers() {
+    // Parse range of init_calls by calling C function.
+    let range_start = __init_calls_start as usize;
+    let range_end = __init_calls_end as usize;
+    display_initcalls_range(range_start, range_end);
+
+    let size = core::mem::size_of::<&CallEntry>();
+    for addr in (range_start..range_end).step_by(size) {
+        let entry = unsafe { core::mem::transmute::<*mut u8, &CallEntry>(addr as *mut u8) };
+        let drv = (entry.init_fn)();
+        // For each driver, display name & compatible
+        display_drv_info(drv.name, drv.compatible);
+    }
 }
 
 fn display_initcalls_range(start: usize, end: usize) {

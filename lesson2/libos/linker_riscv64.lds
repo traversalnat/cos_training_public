@@ -16,9 +16,9 @@ SECTIONS
         *(.text .text.*)
         . = ALIGN(4K);
         etext = .;
-        init_calls_start = .;
+        __init_calls_start = .;
         KEEP(*(.init_calls))
-        init_calls_end = .;
+        __init_calls_end = .;
     }
 
     .rodata : ALIGN(4K) {
