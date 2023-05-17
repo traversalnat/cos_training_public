@@ -28,7 +28,7 @@ fn traverse_drivers() {
 
     let size = core::mem::size_of::<&CallEntry>();
     for addr in (range_start..range_end).step_by(size) {
-        let entry = unsafe { core::mem::transmute::<*mut u8, &CallEntry>(addr as *mut u8) };
+        let entry = unsafe { core::mem::transmute::<usize, &CallEntry>(addr) };
         let drv = (entry.init_fn)();
         // For each driver, display name & compatible
         display_drv_info(drv.name, drv.compatible);
